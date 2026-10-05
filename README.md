@@ -13,8 +13,8 @@ Bar Management System
 
 ## Documentation
 
-[Project Report](https://docs.google.com/document/d/1T71fiFbxO1J_voT65Y-X0RS0qu8nt0z87IOlcJ2TNmM/edit?usp=sharing)
-[API Used](https://www.thecocktaildb.com/)
+[Project Report](https://docs.google.com/document/d/1T71fiFbxO1J_voT65Y-X0RS0qu8nt0z87IOlcJ2TNmM/edit?usp=sharing)  
+[API Used](https://www.thecocktaildb.com/)  
 
 ## Screenshots
 
