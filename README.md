@@ -4,8 +4,18 @@ Bar Management System
 
 ## Features
 
-- Feature 1
-- Feature 2
+- View inventory list
+- Updated quantities in the inventory
+- View Menu
+- Add drinks to menu
+  - Auto add ingredients for drink
+  - Add recipe
+  - Cocktail browser
+- Delete drink from menu 
+  - Auto delete ingredients for drink with no dependencies 
+- Calculate ingredient amounts to fulfill menu per week
+- View recipes for menu drinks
+
 
 ## Authors
 
