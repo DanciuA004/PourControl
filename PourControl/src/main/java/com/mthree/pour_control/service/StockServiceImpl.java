@@ -13,11 +13,11 @@ public class StockServiceImpl implements  StockService {
     IngredientRepository ingredient;
 
     @Override
-    public void UpdateStockQuantity(int id, double quantity) {
+    public void UpdateStockQuantity(int id, String quantity) {
         StockIngredient stockIngredient = ingredient.findById(id)
                 .orElseThrow(() -> new IllegalArgumentException("Ingredient not found: " + id));
 
-        stockIngredient.setMlInStock(BigDecimal.valueOf(quantity));
+        stockIngredient.setMlInStock(new BigDecimal(quantity));
         ingredient.save(stockIngredient);
     }
 

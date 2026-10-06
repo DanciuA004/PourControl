@@ -5,7 +5,7 @@ import com.mthree.pour_control.dto.StockIngredient;
 import java.util.Map;
 
 public interface StockService {
-    void UpdateStockQuantity(int id, double quantity);
+    void UpdateStockQuantity(int id, String quantity);
 
     void UpdateStockTargetValue(StockIngredient ingredient, double quantity);
 

@@ -17,7 +17,7 @@ public class StockController {
     private StockService stockService;
 
     @PostMapping("/{id}")
-    public void UpdateStockQuantity(@PathVariable("id") Integer id, @RequestBody double quantity) {
+    public void UpdateStockQuantity(@PathVariable("id") Integer id, @RequestBody String quantity) {
         stockService.UpdateStockQuantity(id, quantity);
 
     }
