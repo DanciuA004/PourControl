@@ -6,18 +6,18 @@ import java.util.Map;
 
 public class Menu {
 
-    private Long id;
+    private Integer id;
 
     private Map<Integer, Cocktail> cocktailList = new HashMap<>();
 
     public Menu() {
     }
 
-    public Long getId() {
+    public Integer getId() {
         return id;
     }
 
-    public void setId(Long id) {
+    public void setId(Integer id) {
         this.id = id;
     }
 
