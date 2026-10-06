@@ -1,14 +1,13 @@
-package com.mthree.pour_control.model;
+package com.mthree.pour_control.dto;
 
 import jakarta.persistence.*;
 import java.math.BigDecimal;
 
 @Entity
 @Table(name = "ingredients")
-public class Ingredient {
+public class StockIngredient {
 
     @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Integer id;
 
     @Column(nullable = false, length = 100)
@@ -20,10 +19,11 @@ public class Ingredient {
     @Column(name = "ml_volume", nullable = false, precision = 10, scale = 2)
     private BigDecimal mlVolume;
 
-    public Ingredient() {
+    public StockIngredient() {
     }
 
-    public Ingredient(String name, BigDecimal price, BigDecimal mlVolume) {
+    public StockIngredient(Integer id, String name, BigDecimal price, BigDecimal mlVolume) {
+        this.id = id;
         this.name = name;
         this.price = price;
         this.mlVolume = mlVolume;

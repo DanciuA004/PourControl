@@ -1,13 +1,16 @@
-package com.mthree.pour_control.model;
+package com.mthree.pour_control.dto;
 
 import jakarta.persistence.*;
+
+import java.util.HashMap;
+import java.util.List;
 
 @Entity
 @Table
 public class Cocktail {
 
     @Id
-    private Long id;
+    private int id;
 
     @Column(name = "cocktail_name", nullable = false, length = 30)
     private String name;
@@ -15,24 +18,31 @@ public class Cocktail {
     @Column(name = "on_menu", nullable = false)
     private boolean onMenu;
 
-    @OneToOne(cascade = CascadeType.ALL)
-    @JoinColumn(name = "recipe_id", referencedColumnName = "id")
-    private Recipe recipe;
+    @Column
+    private String instructions;
+
+    @ManyToMany
+    @JoinTable(name = "ingredient_in_cocktail",
+        joinColumns = {@JoinColumn(name = "ingredient_id")},
+        inverseJoinColumns = {@JoinColumn(name = "cocktail_id")})
+    private List<StockIngredient> ingredients;
 
     public Cocktail() {
     }
 
-    public Cocktail(String name, boolean onMenu, Recipe recipe) {
+    public Cocktail(Integer id, String name, boolean onMenu, String instructions, List<StockIngredient> ingredients) {
+        this.id = id;
         this.name = name;
         this.onMenu = onMenu;
-        this.recipe = recipe;
+        this.instructions = instructions;
+        this.ingredients = ingredients;
     }
 
-    public Long getId() {
+    public int getId() {
         return id;
     }
 
-    public void setId(Long id) {
+    public void setId(Integer id) {
         this.id = id;
     }
 
@@ -52,11 +62,19 @@ public class Cocktail {
         this.onMenu = onMenu;
     }
 
-    public Recipe getRecipe() {
-        return recipe;
+    public String getInstructions() {
+        return instructions;
     }
 
-    public void setRecipe(Recipe recipe) {
-        this.recipe = recipe;
+    public void setInstructions(String instructions) {
+        this.instructions = instructions;
+    }
+
+    public List<StockIngredient> getIngredients() {
+        return ingredients;
+    }
+
+    public void setIngredients(List<StockIngredient> ingredients) {
+        this.ingredients = ingredients;
     }
 }
