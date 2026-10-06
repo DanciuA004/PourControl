@@ -4,29 +4,32 @@ import jakarta.persistence.*;
 import java.math.BigDecimal;
 
 @Entity
-@Table(name = "ingredients")
+@Table(name = "ingredient")
 public class StockIngredient {
 
     @Id
     private Integer id;
 
-    @Column(nullable = false, length = 100)
+    @Column(name = "ingredient_name", nullable = false, length = 30)
     private String name;
 
-    @Column(precision = 10, scale = 2)
-    private BigDecimal price;
+//    @Column(precision = 10, scale = 2)
+//    private BigDecimal price;
 
-    @Column(name = "ml_volume", nullable = false, precision = 10, scale = 2)
-    private BigDecimal mlVolume;
+    @Column(name = "ml_in_stock", precision = 10, scale = 2)
+    private BigDecimal mlInStock;
+
+    @Column(name = "ml_target", precision = 10, scale = 2)
+    private BigDecimal mlTarget;
 
     public StockIngredient() {
     }
 
-    public StockIngredient(Integer id, String name, BigDecimal price, BigDecimal mlVolume) {
+    public StockIngredient(Integer id, String name, BigDecimal mlInStock, BigDecimal mlTarget) {
         this.id = id;
         this.name = name;
-        this.price = price;
-        this.mlVolume = mlVolume;
+        this.mlInStock = mlInStock;
+        this.mlTarget = mlTarget;
     }
 
     public Integer getId() {
@@ -45,19 +48,19 @@ public class StockIngredient {
         this.name = name;
     }
 
-    public BigDecimal getPrice() {
-        return price;
+    public BigDecimal getMlInStock() {
+        return mlInStock;
     }
 
-    public void setPrice(BigDecimal price) {
-        this.price = price;
+    public void setMlInStock(BigDecimal mlInStock) {
+        this.mlInStock = mlInStock;
     }
 
-    public BigDecimal getMlVolume() {
-        return mlVolume;
+    public BigDecimal getMlTarget() {
+        return mlTarget;
     }
 
-    public void setMlVolume(BigDecimal mlVolume) {
-        this.mlVolume = mlVolume;
+    public void setMlTarget(BigDecimal mlTarget) {
+        this.mlTarget = mlTarget;
     }
 }
