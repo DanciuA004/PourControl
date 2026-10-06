@@ -2,10 +2,11 @@ package com.mthree.pour_control.dto;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
-import java.time.LocalDateTime;
+
+import java.time.LocalDate;
 
 @Entity
-@Table(name = "daily_sales")
+@Table(name = "dailySale")
 public class DailySale {
 
     @Id
@@ -17,7 +18,7 @@ public class DailySale {
     private Integer cocktailId;
 
     @Column(nullable = false)
-    private LocalDateTime date;
+    private LocalDate date;
 
     @Column(name = "qty_sold", nullable = false)
     private int quantitySold;
@@ -25,7 +26,7 @@ public class DailySale {
     public DailySale() {
     }
 
-    public DailySale(Integer cocktailId, LocalDateTime date, int quantitySold) {
+    public DailySale(Integer cocktailId, LocalDate date, int quantitySold) {
         this.cocktailId = cocktailId;
         this.date = date;
         this.quantitySold = quantitySold;
@@ -47,11 +48,11 @@ public class DailySale {
         this.cocktailId = cocktailId;
     }
 
-    public LocalDateTime getDate() {
+    public LocalDate getDate() {
         return date;
     }
 
-    public void setDate(LocalDateTime date) {
+    public void setDate(LocalDate date) {
         this.date = date;
     }
 

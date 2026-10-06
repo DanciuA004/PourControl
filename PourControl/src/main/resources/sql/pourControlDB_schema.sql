@@ -45,8 +45,8 @@ CREATE TABLE dailySale (
 DROP TABLE IF EXISTS dailyAudit;
 CREATE TABLE dailyAudit (
     aid INT AUTO_INCREMENT,
-    ingredient_id INT,
-    date DATETIME,
+    ingredient_id INT NOT NULL,
+    date DATETIME NOT NULL,
     start_ml DECIMAL DEFAULT 0,
     end_ml DECIMAL DEFAULT 0,
     CONSTRAINT PK_dailyAudit PRIMARY KEY (aid),
