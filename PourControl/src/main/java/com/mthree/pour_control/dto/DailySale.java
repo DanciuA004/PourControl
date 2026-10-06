@@ -1,5 +1,6 @@
-package com.mthree.pour_control.model;
+package com.mthree.pour_control.dto;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
 import java.time.LocalDateTime;
 
@@ -9,39 +10,40 @@ public class DailySale {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Long id;
+    private Integer id;
 
-    @Column(name = "cocktail_id", nullable = false)
-    private Long cocktailId;
+    @ManyToOne
+    @JoinColumn(name = "cocktail_id", nullable = false)
+    private Integer cocktailId;
 
     @Column(nullable = false)
     private LocalDateTime date;
 
-    @Column(name = "quantity_sold", nullable = false)
+    @Column(name = "qty_sold", nullable = false)
     private int quantitySold;
 
     public DailySale() {
     }
 
-    public DailySale(Long cocktailId, LocalDateTime date, int quantitySold) {
+    public DailySale(Integer cocktailId, LocalDateTime date, int quantitySold) {
         this.cocktailId = cocktailId;
         this.date = date;
         this.quantitySold = quantitySold;
     }
 
-    public Long getId() {
+    public Integer getId() {
         return id;
     }
 
-    public void setId(Long id) {
+    public void setId(Integer id) {
         this.id = id;
     }
 
-    public Long getCocktailId() {
+    public Integer getCocktailId() {
         return cocktailId;
     }
 
-    public void setCocktailId(Long cocktailId) {
+    public void setCocktailId(Integer cocktailId) {
         this.cocktailId = cocktailId;
     }
 

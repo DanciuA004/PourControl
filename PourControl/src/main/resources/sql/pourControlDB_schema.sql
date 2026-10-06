@@ -35,8 +35,8 @@ DROP TABLE IF EXISTS dailySale;
 CREATE TABLE dailySale (
     sid INT AUTO_INCREMENT,
     cocktail_id INT NOT NULL,
-    date DATETIME,
-    qty_sold INT,
+    date DATETIME NOT NULL,
+    qty_sold INT NOT NULL,
     CONSTRAINT PK_dailySale PRIMARY KEY (sid),
     CONSTRAINT FOREIGN KEY FK_cocktail_sale (cocktail_id)
         REFERENCES cocktail (cid)
