@@ -15,7 +15,7 @@ public class DailyAudit {
 
     @ManyToOne
     @JoinColumn(name = "ingredient_id", nullable = false)
-    private Integer ingredientId;
+    private StockIngredient ingredient;
 
     @Column(nullable = false)
     private LocalDate date;
@@ -31,8 +31,8 @@ public class DailyAudit {
     }
 
 
-    public DailyAudit(Integer ingredientId, LocalDate date, BigDecimal startMl, BigDecimal endMl) {
-        this.ingredientId = ingredientId;
+    public DailyAudit(StockIngredient ingredient, LocalDate date, BigDecimal startMl, BigDecimal endMl) {
+        this.ingredient = ingredient;
         this.date = date;
         this.startMl = startMl;
         this.endMl = endMl;
@@ -46,12 +46,12 @@ public class DailyAudit {
         this.id = id;
     }
 
-    public Integer getIngredientId() {
-        return ingredientId;
+    public StockIngredient getIngredientId() {
+        return ingredient;
     }
 
-    public void setIngredientId(Integer ingredientId) {
-        this.ingredientId = ingredientId;
+    public void setIngredientId(StockIngredient ingredient) {
+        this.ingredient = ingredient;
     }
 
     public LocalDate getDate() {

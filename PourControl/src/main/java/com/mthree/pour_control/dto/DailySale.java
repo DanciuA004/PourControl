@@ -15,7 +15,7 @@ public class DailySale {
 
     @ManyToOne
     @JoinColumn(name = "cocktail_id", nullable = false)
-    private Integer cocktailId;
+    private Cocktail cocktailId;
 
     @Column(nullable = false)
     private LocalDate date;
@@ -26,7 +26,7 @@ public class DailySale {
     public DailySale() {
     }
 
-    public DailySale(Integer cocktailId, LocalDate date, int quantitySold) {
+    public DailySale(Cocktail cocktailId, LocalDate date, int quantitySold) {
         this.cocktailId = cocktailId;
         this.date = date;
         this.quantitySold = quantitySold;
@@ -40,11 +40,11 @@ public class DailySale {
         this.id = id;
     }
 
-    public Integer getCocktailId() {
+    public Cocktail getCocktailId() {
         return cocktailId;
     }
 
-    public void setCocktailId(Integer cocktailId) {
+    public void setCocktailId(Cocktail cocktailId) {
         this.cocktailId = cocktailId;
     }
 
