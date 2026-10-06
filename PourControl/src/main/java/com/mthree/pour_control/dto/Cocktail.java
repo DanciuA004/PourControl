@@ -9,7 +9,7 @@ public class Cocktail {
     @Id
     private Long id;
 
-    @Column(nullable = false, length = 100)
+    @Column(name = "cocktail_name", nullable = false, length = 30)
     private String name;
 
     @Column(name = "on_menu", nullable = false)

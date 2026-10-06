@@ -4,27 +4,14 @@ import jakarta.persistence.*;
 import java.util.HashMap;
 import java.util.Map;
 
-@Entity
-@Table(name = "recipes")
 public class Recipe {
 
-    @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    @Column(name = "cocktail_id", nullable = false)
     private Integer cocktailId;
 
-    @ManyToMany
-    @JoinTable(
-            name = "recipe_ingredients",
-            joinColumns = @JoinColumn(name = "recipe_id"),
-            inverseJoinColumns = @JoinColumn(name = "ingredient_id")
-    )
-    @MapKeyColumn(name = "ingredient_id_key")
     private Map<Integer, Ingredient> ingredient = new HashMap<>();
 
-    @Column(columnDefinition = "TEXT")
     private String description;
 
     public Recipe() {
