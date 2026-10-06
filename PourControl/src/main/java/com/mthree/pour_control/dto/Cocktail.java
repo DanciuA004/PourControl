@@ -1,13 +1,12 @@
 package com.mthree.pour_control.model;
 
-import jakarta.persistence.*;
+import javax.persistence.*;
 
 @Entity
-@Table(name = "cocktails")
+@Table
 public class Cocktail {
 
     @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
     @Column(nullable = false, length = 100)
