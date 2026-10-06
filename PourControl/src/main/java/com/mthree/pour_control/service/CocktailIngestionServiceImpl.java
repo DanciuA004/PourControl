@@ -45,7 +45,6 @@ public class CocktailIngestionServiceImpl implements CocktailIngestionService {
     @Transactional
     @SuppressWarnings("unchecked")
     public <T> T addCocktail(String cocktail) {
-        // Query API for Cocktail ID
         int cocktailId = getCocktailRecipeFromApi(cocktail);
         if (cocktailId == 0) {
             return (T) Double.valueOf(0.0);
@@ -56,7 +55,6 @@ public class CocktailIngestionServiceImpl implements CocktailIngestionService {
         currentCocktail.setName(cocktail);
         currentCocktail.setOnMenu(true);
 
-        // Fetch detailed recipe instructions & ingredients
         String recipeUrl = String.format("%s/%d/information?apiKey=%s", baseUrl, cocktailId, apiKey);
         List<RecipeIngredient> recipeIngredients = new ArrayList<>();
         String instructions = "";
@@ -76,15 +74,17 @@ public class CocktailIngestionServiceImpl implements CocktailIngestionService {
                     double amount = node.path("amount").asDouble(0.0);
 
                     // Ensure Stock Ingredient exists in DB
-                    getOrCreateIngredient(id, name);
+                    StockIngredient stockIngredient = getOrCreateIngredient(id, name);
 
                     // Unit conversion
                     double mlRequired = convertToMl(unit) * amount;
 
-                    RecipeIngredient ri = new RecipeIngredient();
-                    ri.setId(id);
-                    ri.setName(name);
-                    ri.setMlRequired(BigDecimal.valueOf(mlRequired));
+                    // Build join entity retaining mlRequired
+                    RecipeIngredient ri = new RecipeIngredient(
+                            currentCocktail,
+                            stockIngredient,
+                            BigDecimal.valueOf(mlRequired)
+                    );
 
                     recipeIngredients.add(ri);
                 }
@@ -93,8 +93,8 @@ public class CocktailIngestionServiceImpl implements CocktailIngestionService {
             throw new RuntimeException("Error fetching cocktail recipe details from API", e);
         }
 
-        // Map relations and persist
-        saveRecipeIngredients(currentCocktail, recipeIngredients);
+        // Link recipe ingredients to cocktail
+        currentCocktail.setRecipeIngredients(recipeIngredients);
         double result = saveRecipeInstructions(currentCocktail, instructions);
 
         return (T) Double.valueOf(result);
@@ -153,23 +153,6 @@ public class CocktailIngestionServiceImpl implements CocktailIngestionService {
             return 4.92892;
         }
         return 1.0;
-    }
-
-    private double saveRecipeIngredients(Cocktail cocktail, List<RecipeIngredient> recipeIngredientList) {
-        if (cocktail == null || recipeIngredientList == null) {
-            return 0.0;
-        }
-
-        List<StockIngredient> ingredientsToLink = new ArrayList<>();
-        for (RecipeIngredient ri : recipeIngredientList) {
-            StockIngredient stockIngredient = ingredientRepository.findById(ri.getId()).orElse(null);
-            if (stockIngredient != null) {
-                ingredientsToLink.add(stockIngredient);
-            }
-        }
-
-        cocktail.setIngredients(ingredientsToLink);
-        return recipeIngredientList.size();
     }
 
     private double saveRecipeInstructions(Cocktail cocktail, String instructions) {

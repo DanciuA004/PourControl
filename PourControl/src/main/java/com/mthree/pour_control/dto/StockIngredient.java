@@ -9,6 +9,7 @@ import java.util.List;
 public class StockIngredient {
 
     @Id
+    @Column(name = "iid")
     private Integer id;
 
     @Column(name = "ingredient_name", nullable = false, length = 30)

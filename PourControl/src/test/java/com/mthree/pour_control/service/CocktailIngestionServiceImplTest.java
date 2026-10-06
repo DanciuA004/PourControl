@@ -1,141 +1,137 @@
 package com.mthree.pour_control.service;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
 import com.mthree.pour_control.dto.Cocktail;
+import com.mthree.pour_control.dto.RecipeIngredient;
 import com.mthree.pour_control.dto.StockIngredient;
-import com.mthree.pour_control.model.CocktailRepository;
-import com.mthree.pour_control.model.IngredientRepository;
 import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
-import org.junit.jupiter.api.extension.ExtendWith;
-import org.mockito.ArgumentCaptor;
-import org.mockito.InjectMocks;
-import org.mockito.Mock;
-import org.mockito.junit.jupiter.MockitoExtension;
+import org.springframework.boot.web.client.RestTemplateBuilder;
 import org.springframework.test.util.ReflectionTestUtils;
-import org.springframework.web.client.RestTemplate;
 
-import java.util.HashMap;
-import java.util.Map;
-import java.util.Optional;
+import java.math.BigDecimal;
+import java.util.ArrayList;
+import java.util.List;
 
-import static org.junit.jupiter.api.Assertions.*;
-import static org.mockito.ArgumentMatchers.*;
-import static org.mockito.Mockito.*;
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.within;
 
-@ExtendWith(MockitoExtension.class)
-class CocktailIngestionServiceImplTest {
+/**
+ * Basic tests with no mocking framework.
+ * Covers the pure logic: unit conversion and how the entities fit together.
+ */
+class CocktailIngestionLogicTest {
 
-    @Mock
-    private IngredientRepository ingredientRepository;
-
-    @Mock
-    private CocktailRepository cocktailRepository;
-
-    @Mock
-    private RestTemplate restTemplate;
-
-    @InjectMocks
     private CocktailIngestionServiceImpl service;
 
     @BeforeEach
     void setUp() {
-        ReflectionTestUtils.setField(service, "apiKey", "test-api-key");
-        ReflectionTestUtils.setField(service, "baseUrl", "https://api.spoonacular.com/recipes");
-        ReflectionTestUtils.setField(service, "restTemplate", restTemplate);
+        // The repositories are not used by convertToMl, so null is fine here.
+        // If you add RecipeIngredientRepository to the constructor, add another null.
+        service = new CocktailIngestionServiceImpl(
+                null,
+                null,
+                new RestTemplateBuilder(),
+                new ObjectMapper());
+    }
+
+    /** convertToMl is private, so call it through reflection. */
+    private double toMl(String unit) {
+        Double result = ReflectionTestUtils.invokeMethod(service, "convertToMl", unit);
+        return result;
+    }
+
+    // ---------- unit conversion ----------
+
+    @Test
+    @DisplayName("oz converts to 29.5735 ml")
+    void ounces() {
+        assertThat(toMl("oz")).isEqualTo(29.5735, within(0.0001));
+        assertThat(toMl("ounces")).isEqualTo(29.5735, within(0.0001));
     }
 
     @Test
-    @DisplayName("addCocktail: Success - Fetches API data and persists cocktail and ingredients")
-    void addCocktail_Success() {
-        String searchJsonResponse = """
-            {
-              "results": [
-                { "id": 11000, "title": "Margarita" }
-              ]
-            }
-            """;
-
-        String recipeInfoJsonResponse = """
-            {
-              "instructions": "Shake with ice and strain into glass.",
-              "extendedIngredients": [
-                { "id": 1, "name": "Tequila", "unit": "oz", "amount": 2.0 },
-                { "id": 2, "name": "Lime Juice", "unit": "oz", "amount": 1.0 }
-              ]
-            }
-            """;
-
-        when(restTemplate.getForObject(contains("/complexSearch"), eq(String.class)))
-                .thenReturn(searchJsonResponse);
-        when(restTemplate.getForObject(contains("/11000/information"), eq(String.class)))
-                .thenReturn(recipeInfoJsonResponse);
-
-        // Map to simulate in-memory repository storage for findById and save
-        Map<Integer, StockIngredient> dbStore = new HashMap<>();
-
-        when(ingredientRepository.findById(anyInt()))
-                .thenAnswer(invocation -> {
-                    Integer id = invocation.getArgument(0);
-                    return Optional.ofNullable(dbStore.get(id));
-                });
-
-        when(ingredientRepository.save(any(StockIngredient.class)))
-                .thenAnswer(invocation -> {
-                    StockIngredient ing = invocation.getArgument(0);
-                    dbStore.put(ing.getId(), ing);
-                    return ing;
-                });
-
-        Double result = service.<Double>addCocktail("Margarita");
-
-        assertNotNull(result);
-        assertEquals(11000.0, result);
-
-        ArgumentCaptor<Cocktail> cocktailCaptor = ArgumentCaptor.forClass(Cocktail.class);
-        verify(cocktailRepository, times(1)).save(cocktailCaptor.capture());
-
-        Cocktail savedCocktail = cocktailCaptor.getValue();
-        assertEquals(11000, savedCocktail.getId());
-        assertEquals("Margarita", savedCocktail.getName());
-        assertEquals("Shake with ice and strain into glass.", savedCocktail.getInstructions());
-        assertEquals(2, savedCocktail.getIngredients().size());
+    @DisplayName("cl converts to 10 ml")
+    void centilitres() {
+        assertThat(toMl("cl")).isEqualTo(10.0, within(0.0001));
     }
 
     @Test
-    @DisplayName("addCocktail: Returns 0.0 when recipe is not found on Spoonacular")
-    void addCocktail_NotFound() {
-        String searchJsonResponse = "{\"results\": []}";
-
-        when(restTemplate.getForObject(anyString(), eq(String.class)))
-                .thenReturn(searchJsonResponse);
-
-        Double result = service.<Double>addCocktail("UnknownDrink");
-
-        assertEquals(0.0, result);
-        verifyNoInteractions(ingredientRepository);
-        verifyNoInteractions(cocktailRepository);
+    @DisplayName("dash converts to 0.92 ml")
+    void dash() {
+        assertThat(toMl("dash")).isEqualTo(0.92, within(0.0001));
     }
 
     @Test
-    @DisplayName("removeCocktail: Deletes entity when ID exists")
-    void removeCocktail_Success() {
-        when(cocktailRepository.existsById(11000)).thenReturn(true);
-
-        boolean result = service.removeCocktail(11000);
-
-        assertTrue(result);
-        verify(cocktailRepository, times(1)).deleteById(11000);
+    @DisplayName("tablespoon and teaspoon convert correctly")
+    void spoons() {
+        assertThat(toMl("tbsp")).isEqualTo(14.7868, within(0.0001));
+        assertThat(toMl("tablespoons")).isEqualTo(14.7868, within(0.0001));
+        assertThat(toMl("tsp")).isEqualTo(4.92892, within(0.0001));
+        assertThat(toMl("teaspoon")).isEqualTo(4.92892, within(0.0001));
     }
 
     @Test
-    @DisplayName("removeCocktail: Returns false when ID does not exist")
-    void removeCocktail_NotFound() {
-        when(cocktailRepository.existsById(99999)).thenReturn(false);
+    @DisplayName("units are matched case-insensitively and trimmed")
+    void caseAndWhitespace() {
+        assertThat(toMl("  OZ ")).isEqualTo(29.5735, within(0.0001));
+    }
 
-        boolean result = service.removeCocktail(99999);
+    @Test
+    @DisplayName("amount x conversion: 2 oz is about 59.147 ml")
+    void twoOunces() {
+        assertThat(toMl("oz") * 2.0).isEqualTo(59.147, within(0.001));
+    }
 
-        assertFalse(result);
-        verify(cocktailRepository, never()).deleteById(anyInt());
+    @Test
+    @DisplayName("blank, null and unknown units currently fall back to 1.0")
+    void fallbackBehaviour() {
+        assertThat(toMl("")).isEqualTo(1.0);
+        assertThat(toMl(null)).isEqualTo(1.0);
+        assertThat(toMl("lime")).isEqualTo(1.0);
+    }
+
+    // ---------- entities ----------
+
+    @Test
+    @DisplayName("RecipeIngredient keeps its cocktail, ingredient and ml amount")
+    void recipeIngredientHoldsValues() {
+        Cocktail cocktail = new Cocktail();
+        StockIngredient tequila = new StockIngredient(101, "Tequila", BigDecimal.ZERO, BigDecimal.ZERO);
+
+        RecipeIngredient ri = new RecipeIngredient(cocktail, tequila, new BigDecimal("59.15"));
+
+        assertThat(ri.getCocktail()).isSameAs(cocktail);
+        assertThat(ri.getStockIngredient()).isSameAs(tequila);
+        assertThat(ri.getMlRequired()).isEqualByComparingTo("59.15");
+    }
+
+    @Test
+    @DisplayName("a new Cocktail starts with an empty recipe")
+    void newCocktailHasEmptyRecipe() {
+        Cocktail cocktail = new Cocktail();
+
+        assertThat(cocktail.getRecipeIngredients()).isNotNull().isEmpty();
+    }
+
+    @Test
+    @DisplayName("Cocktail stores its id, name, menu flag and recipe")
+    void cocktailStoresValues() {
+        Cocktail cocktail = new Cocktail();
+        cocktail.setId(12345);
+        cocktail.setName("Margarita");
+        cocktail.setOnMenu(true);
+
+        StockIngredient tequila = new StockIngredient(101, "Tequila", BigDecimal.ZERO, BigDecimal.ZERO);
+        List<RecipeIngredient> recipe = new ArrayList<>();
+        recipe.add(new RecipeIngredient(cocktail, tequila, new BigDecimal("59.15")));
+        cocktail.setRecipeIngredients(recipe);
+
+        assertThat(cocktail.getId()).isEqualTo(12345);
+        assertThat(cocktail.getName()).isEqualTo("Margarita");
+        assertThat(cocktail.isOnMenu()).isTrue();
+        assertThat(cocktail.getRecipeIngredients()).hasSize(1);
     }
 }

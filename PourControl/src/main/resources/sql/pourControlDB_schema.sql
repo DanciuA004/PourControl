@@ -23,11 +23,15 @@ CREATE TABLE ingredient (
 
 DROP TABLE IF EXISTS ingredientInCocktail;
 CREATE TABLE ingredientInCocktail (
-    ingredient_id INT,
-    cocktail_id INT,
-    CONSTRAINT FOREIGN KEY FK_ingredient_for_cocktail (ingredient_id)
+    id INT AUTO_INCREMENT,
+    ingredient_id INT NOT NULL,
+    cocktail_id INT NOT NULL,
+    ml_required DECIMAL(10, 2) NOT NULL,
+    CONSTRAINT PK_ingredientInCocktail PRIMARY KEY (id),
+    CONSTRAINT UQ_cocktail_ingredient UNIQUE (cocktail_id, ingredient_id),
+    CONSTRAINT FK_ingredient_for_cocktail FOREIGN KEY (ingredient_id)
         REFERENCES ingredient (iid),
-    CONSTRAINT FOREIGN KEY FK_cocktail_for_ingredient (cocktail_id)
+    CONSTRAINT FK_cocktail_for_ingredient FOREIGN KEY (cocktail_id)
         REFERENCES cocktail (cid)
 );
 
