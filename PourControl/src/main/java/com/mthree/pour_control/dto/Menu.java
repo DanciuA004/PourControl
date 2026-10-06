@@ -1,24 +1,13 @@
-package com.mthree.pour_control.model;
+package com.mthree.pour_control.dto;
 
 import jakarta.persistence.*;
 import java.util.HashMap;
 import java.util.Map;
 
-@Entity
-@Table(name = "menus")
 public class Menu {
 
-    @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    @ManyToMany
-    @JoinTable(
-            name = "menu_cocktails",
-            joinColumns = @JoinColumn(name = "menu_id"),
-            inverseJoinColumns = @JoinColumn(name = "cocktail_id")
-    )
-    @MapKeyColumn(name = "cocktail_key")
     private Map<Integer, Cocktail> cocktailList = new HashMap<>();
 
     public Menu() {

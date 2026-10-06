@@ -2,6 +2,7 @@ package com.mthree.pour_control.dto;
 
 import jakarta.persistence.*;
 import java.math.BigDecimal;
+import java.util.List;
 
 @Entity
 @Table(name = "ingredient")
@@ -21,6 +22,9 @@ public class StockIngredient {
 
     @Column(name = "ml_target", precision = 10, scale = 2)
     private BigDecimal mlTarget;
+
+    @ManyToMany(mappedBy = "ingredients")
+    private List<Cocktail> cocktails;
 
     public StockIngredient() {
     }
