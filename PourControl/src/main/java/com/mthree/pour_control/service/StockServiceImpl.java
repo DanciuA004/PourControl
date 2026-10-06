@@ -7,7 +7,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import java.math.BigDecimal;
 import java.util.Map;
 
-public class StockServiceImpl implements  StockService {
+public class StockServiceImpl implements StockService {
 
     @Autowired
     IngredientRepository ingredient;
@@ -22,12 +22,13 @@ public class StockServiceImpl implements  StockService {
     }
 
     @Override
-    public void UpdateStockTargetValue(StockIngredient ingredient, double quantity) {
-
+    public void UpdateStockTargetValue(StockIngredient ingredient, String quantity) {
+        ingredient.setMlTarget(new BigDecimal(quantity));
+        this.ingredient.save(ingredient);
     }
 
     @Override
-    public void ProcessDailyCloseOut(Map<StockIngredient, Double> ingredients) {
+    public void ProcessDailyCloseOut(Map<StockIngredient, String> ingredients) {
 
     }
 }

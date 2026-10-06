@@ -9,5 +9,7 @@ public interface StockService {
 
     void UpdateStockTargetValue(StockIngredient ingredient, double quantity);
 
-    void ProcessDailyCloseOut(Map<StockIngredient, Double> ingredients);
+    void UpdateStockTargetValue(StockIngredient ingredient, String quantity);
+
+    void ProcessDailyCloseOut(Map<StockIngredient, String> ingredients);
 }

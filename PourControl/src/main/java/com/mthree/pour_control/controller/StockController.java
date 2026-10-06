@@ -22,8 +22,8 @@ public class StockController {
 
     }
 
-    public void UpdateStockTargetValue(StockIngredient ingredient, double quantity) {
-
+    public void UpdateStockTargetValue(StockIngredient ingredient, String quantity) {
+        stockService.UpdateStockTargetValue(ingredient, quantity);
 
     }
 
