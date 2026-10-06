@@ -14,9 +14,6 @@ public class StockIngredient {
     @Column(name = "ingredient_name", nullable = false, length = 30)
     private String name;
 
-//    @Column(precision = 10, scale = 2)
-//    private BigDecimal price;
-
     @Column(name = "ml_in_stock", precision = 10, scale = 2)
     private BigDecimal mlInStock;
 
