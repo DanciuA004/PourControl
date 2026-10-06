@@ -16,8 +16,8 @@ DROP TABLE IF EXISTS ingredient;
 CREATE TABLE ingredient (
     iid INT,
     ingredient_name VARCHAR(30) NOT NULL,
-    ml_inStock INT DEFAULT 0,
-    target_ml INT DEFAULT 0,
+    ml_inStock DECIMAL DEFAULT 0,
+    target_ml DECIMAL DEFAULT 0,
     CONSTRAINT PK_ingredient PRIMARY KEY (iid)
 );
 
@@ -47,8 +47,8 @@ CREATE TABLE dailyAudit (
     aid INT AUTO_INCREMENT,
     ingredient_id INT,
     date DATETIME,
-    start_ml INT DEFAULT 0,
-    end_ml INT DEFAULT 0,
+    start_ml DECIMAL DEFAULT 0,
+    end_ml DECIMAL DEFAULT 0,
     CONSTRAINT PK_dailyAudit PRIMARY KEY (aid),
     CONSTRAINT FOREIGN KEY FK_ingredient_audit (ingredient_id)
         REFERENCES ingredient (iid)
