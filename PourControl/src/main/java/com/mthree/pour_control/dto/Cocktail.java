@@ -1,6 +1,6 @@
 package com.mthree.pour_control.model;
 
-import javax.persistence.*;
+import jakarta.persistence.*;
 
 @Entity
 @Table
