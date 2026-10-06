@@ -2,15 +2,18 @@ package com.mthree.pour_control.service;
 
 import com.mthree.pour_control.dto.StockIngredient;
 import com.mthree.pour_control.model.IngredientRepository;
-import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Service;
 
 import java.math.BigDecimal;
 import java.util.Map;
 
+@Service
 public class StockServiceImpl implements StockService {
-
-    @Autowired
     IngredientRepository ingredient;
+
+    public StockServiceImpl(IngredientRepository ingredient) {
+        this.ingredient = ingredient;
+    }
 
     @Override
     public void UpdateStockQuantity(int id, String quantity) {

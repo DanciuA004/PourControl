@@ -12,9 +12,11 @@ import java.util.Map;
 
 @RestController
 public class StockController {
-
-    @Autowired
     private StockService stockService;
+
+    public StockController(StockService stockService) {
+        this.stockService = stockService;
+    }
 
     @PostMapping("/{id}")
     public void UpdateStockQuantity(@PathVariable("id") Integer id, @RequestBody String quantity) {
