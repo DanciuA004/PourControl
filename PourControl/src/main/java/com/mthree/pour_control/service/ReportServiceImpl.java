@@ -116,13 +116,4 @@ public class ReportServiceImpl implements ReportService {
         return Map.of();
     }
 
-    /***
-     * Returns number of ml used of a single ingredient according to the audit
-     * @param iid id of ingredient to calculate usage of
-     * @return actual value of ml used of ingredient
-     */
-    private BigDecimal calculateActualUsage(Integer iid) {
-        
-        return null;
-    }
 }
