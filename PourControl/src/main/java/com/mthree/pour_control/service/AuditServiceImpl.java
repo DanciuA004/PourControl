@@ -81,7 +81,7 @@ public class AuditServiceImpl implements AuditService {
                         .orElseGet(() -> {
                             DailyAudit newAudit = new DailyAudit();
                             newAudit.setDate(today);
-                            newAudit.setIngredientId(ingredient);
+                            newAudit.setIngredient(ingredient);
                             newAudit.setStartMl(initialStartMl); // Captured prior to stock updates
                             return newAudit;
                         });
