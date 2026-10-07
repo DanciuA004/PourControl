@@ -47,11 +47,11 @@ public class DailyAudit {
         this.id = id;
     }
 
-    public StockIngredient getIngredientId() {
+    public StockIngredient getIngredient() {
         return ingredient;
     }
 
-    public void setIngredientId(StockIngredient ingredient) {
+    public void setIngredient(StockIngredient ingredient) {
         this.ingredient = ingredient;
     }
 
