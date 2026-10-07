@@ -1,16 +1,12 @@
 package com.mthree.pour_control.service;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
 import com.mthree.pour_control.dto.*;
 import com.mthree.pour_control.model.CocktailRepository;
 import com.mthree.pour_control.model.DailyAuditRepository;
 import com.mthree.pour_control.model.DailySaleRepository;
 import com.mthree.pour_control.model.IngredientRepository;
 import jakarta.transaction.Transactional;
-import org.springframework.beans.factory.annotation.Value;
-import org.springframework.boot.web.client.RestTemplateBuilder;
 import org.springframework.stereotype.Service;
-import org.springframework.web.client.RestTemplate;
 
 import java.math.BigDecimal;
 import java.time.LocalDate;
@@ -18,7 +14,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 @Service
-public class AuditServiceImpl implements AuditService{
+public class AuditServiceImpl implements AuditService {
 
     private final DailySaleRepository dailySaleRepository;
     private final DailyAuditRepository dailyAuditRepository;
@@ -40,59 +36,67 @@ public class AuditServiceImpl implements AuditService{
     public void processCloseout(DailyCloseoutRequest request) {
         LocalDate today = LocalDate.now();
 
-        if (request.getCocktailCloseout() != null) {
+        // Process Cocktail Sales (Upsert)
+        if (request.getCocktailCloseout() != null && !request.getCocktailCloseout().isEmpty()) {
             List<DailySale> salesToSave = new ArrayList<>();
 
             request.getCocktailCloseout().forEach((cocktailId, qtySold) -> {
-                Cocktail cocktail = cocktailRepository.findById(cocktailId)
-                        .orElseThrow(() -> new IllegalArgumentException("Cocktail not found: " + cocktailId));
 
-                DailySale sale = new DailySale();
-                sale.setCocktailId(cocktail);
+                //first confirm the existence of the cocktail we're adding a sale record for
+                Cocktail cocktail = cocktailRepository.findById(cocktailId)
+                        .orElseThrow(() -> new IllegalArgumentException("Cocktail not found with ID: " + cocktailId));
+
+                //find a daily sale entry for this cocktail for toady
+                DailySale sale = dailySaleRepository.findByCocktailIdAndDate(cocktail, today)
+                        //if no pre-existing entry, then create a new daily sale object with the values we want to save
+                        .orElseGet(() -> {
+                            DailySale newSale = new DailySale();
+                            newSale.setCocktailId(cocktail);
+                            newSale.setDate(today);
+                            return newSale;
+                        });
+
                 sale.setQuantitySold(qtySold);
-                sale.setDate(today);
                 salesToSave.add(sale);
             });
 
-            batchAddDailySales(salesToSave);
+            dailySaleRepository.saveAll(salesToSave);
         }
 
-        // Process Stock Level Updates
-        if (request.getStockCloseout() != null) {
+        // Process Stock Audits & Update Inventory (Upsert)
+        if (request.getStockCloseout() != null && !request.getStockCloseout().isEmpty()) {
             List<StockIngredient> stockToSave = new ArrayList<>();
             List<DailyAudit> auditsToSave = new ArrayList<>();
 
             request.getStockCloseout().forEach((stockId, newVolume) -> {
                 StockIngredient ingredient = ingredientRepository.findById(stockId)
-                        .orElseThrow(() -> new IllegalArgumentException("Stock item not found: " + stockId));
+                        .orElseThrow(() -> new IllegalArgumentException("Stock item not found with ID: " + stockId));
 
-                DailyAudit audit = new DailyAudit();
-                audit.setDate(today);
-                audit.setStartMl(ingredient.getMlInStock());
-                audit.setEndMl(BigDecimal.valueOf(newVolume));
-                audit.setIngredientId(ingredient);
+                BigDecimal updatedVolume = BigDecimal.valueOf(newVolume);
+
+                // Preserve true starting baseline before updating stock level
+                BigDecimal initialStartMl = ingredient.getMlInStock();
+
+                DailyAudit audit = dailyAuditRepository.findByIngredientAndDate(ingredient, today)
+                        .orElseGet(() -> {
+                            DailyAudit newAudit = new DailyAudit();
+                            newAudit.setDate(today);
+                            newAudit.setIngredientId(ingredient);
+                            newAudit.setStartMl(initialStartMl); // Captured prior to stock updates
+                            return newAudit;
+                        });
+
+                // Update closing volume for today's audit
+                audit.setEndMl(updatedVolume);
                 auditsToSave.add(audit);
 
-
-
-                ingredient.setMlInStock(BigDecimal.valueOf(newVolume));
+                // Update live stock inventory level
+                ingredient.setMlInStock(updatedVolume);
                 stockToSave.add(ingredient);
             });
 
-            batchAddDailyAudit(auditsToSave);
+            dailyAuditRepository.saveAll(auditsToSave);
             ingredientRepository.saveAll(stockToSave);
         }
-    }
-
-
-    @Transactional
-    private List<DailyAudit> batchAddDailyAudit(List<DailyAudit> dailyAudits) {
-        return dailyAuditRepository.saveAll(dailyAudits);
-    }
-
-
-    @Transactional
-    private List<DailySale> batchAddDailySales(List<DailySale> dailySales) {
-        return dailySaleRepository.saveAll(dailySales);
     }
 }
