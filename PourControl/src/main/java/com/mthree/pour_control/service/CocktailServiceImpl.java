@@ -43,11 +43,10 @@ public class CocktailServiceImpl implements CocktailService {
 
     @Override
     @Transactional
-    @SuppressWarnings("unchecked")
-    public <T> T addCocktail(String cocktail) {
+    public Cocktail addCocktail(String cocktail) {
         int cocktailId = getCocktailRecipeFromApi(cocktail);
         if (cocktailId == 0) {
-            return (T) Double.valueOf(0.0);
+            return null;
         }
 
         Cocktail currentCocktail = new Cocktail();
@@ -94,9 +93,9 @@ public class CocktailServiceImpl implements CocktailService {
 
         // Link recipe ingredients to cocktail
         currentCocktail.setRecipeIngredients(recipeIngredients);
-        double result = saveRecipeInstructions(currentCocktail, instructions);
+        saveRecipeInstructions(currentCocktail, instructions);
 
-        return (T) Double.valueOf(result);
+        return currentCocktail;
     }
 
     @Override
@@ -106,6 +105,11 @@ public class CocktailServiceImpl implements CocktailService {
             return true;
         }
         return false;
+    }
+
+    @Override
+    public List<Cocktail> getAllCocktails() {
+        return cocktailRepository.findAll();
     }
 
     private int getCocktailRecipeFromApi(String cocktailName) {
@@ -154,12 +158,9 @@ public class CocktailServiceImpl implements CocktailService {
         return 1.0;
     }
 
-    private double saveRecipeInstructions(Cocktail cocktail, String instructions) {
-        if (cocktail != null) {
-            cocktail.setInstructions(instructions);
-            cocktailRepository.save(cocktail);
-            return cocktail.getId();
-        }
-        return 0.0;
+    private String saveRecipeInstructions(Cocktail cocktail, String instructions) {
+        cocktail.setInstructions(instructions);
+        Cocktail saved = cocktailRepository.save(cocktail);
+        return saved.getInstructions();
     }
 }
