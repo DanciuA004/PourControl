@@ -1,7 +1,9 @@
 package com.mthree.pour_control.dto;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
 import java.math.BigDecimal;
+import java.util.ArrayList;
 import java.util.List;
 
 @Entity
@@ -21,8 +23,9 @@ public class StockIngredient {
     @Column(name = "ml_target", precision = 10, scale = 2)
     private BigDecimal mlTarget;
 
-    @ManyToMany(mappedBy = "ingredients")
-    private List<Cocktail> cocktails;
+    @OneToMany(mappedBy = "stockIngredient", cascade = CascadeType.ALL)
+    @JsonIgnore
+    private List<RecipeIngredient> recipeIngredients = new ArrayList<>();
 
     public StockIngredient() {
     }
