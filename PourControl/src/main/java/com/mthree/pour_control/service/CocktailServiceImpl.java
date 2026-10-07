@@ -110,6 +110,7 @@ public class CocktailServiceImpl implements CocktailService {
     @Override
     public List<Cocktail> getAllCocktails() {
         return cocktailRepository.findAll();
+
     }
 
     private int getCocktailRecipeFromApi(String cocktailName) {

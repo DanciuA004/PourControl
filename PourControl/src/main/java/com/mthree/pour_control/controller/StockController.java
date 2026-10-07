@@ -20,9 +20,15 @@ public class StockController {
 
     }
 
+    /**
+     * Returns a list of all ingredients
+     *
+     * @return list of all ingredients
+     */
     @GetMapping
     public List<StockIngredient> getAllIngredients() {
         return stockService.getAllIngredients();
+
     }
 
     /**

@@ -31,5 +31,6 @@ public class CocktailController {
     @GetMapping
     public List<Cocktail> getAllCocktails() {
         return cocktailService.getAllCocktails();
+
     }
 }
