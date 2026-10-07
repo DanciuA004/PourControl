@@ -12,6 +12,7 @@ import java.util.Map;
  */
 @RestController
 @RequestMapping("/api/stock")
+@CrossOrigin(origins = "*")
 public class StockController {
     private StockService stockService;
 
@@ -38,7 +39,9 @@ public class StockController {
      * @param quantity the new quantity to set
      */
     @PutMapping("/updateQuantity/{id}")
-    public void UpdateStockQuantity(@PathVariable Integer id, @RequestBody String quantity) {
+    public void UpdateStockQuantity(@PathVariable Integer id, @RequestBody Map<String, String> request) {
+        String quantity = request.get("quantity");
+
         stockService.UpdateStockQuantity(id, quantity);
 
     }
@@ -50,8 +53,10 @@ public class StockController {
      * @param id the id the ingredient
      * @param quantity the new target quantity to set
      */
-    @PostMapping("/updateTargetQuantity/{id}")
-    public void UpdateStockTargetValue(@PathVariable Integer id, @RequestBody String quantity) {
+    @PutMapping("/updateTargetQuantity/{id}")
+    public void UpdateStockTargetValue(@PathVariable Integer id, @RequestBody Map<String, String> request) {
+
+        String quantity = request.get("quantity");
         stockService.UpdateStockTargetValue(id, quantity);
 
     }
