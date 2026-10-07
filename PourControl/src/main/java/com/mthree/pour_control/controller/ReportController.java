@@ -2,27 +2,35 @@ package com.mthree.pour_control.controller;
 
 import com.mthree.pour_control.dto.DailyCloseoutRequest;
 import com.mthree.pour_control.service.AuditService;
+import com.mthree.pour_control.service.ReportService;
 import com.mthree.pour_control.service.StockService;
+import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.*;
 
+import java.time.LocalDate;
+
 @RestController
-@RequestMapping("/api")
 @CrossOrigin(origins = "*")
+@RequestMapping("/api")
 public class ReportController {
 
     private AuditService auditService;
+    private ReportService reportService;
 
-    public ReportController(AuditService auditService) {
+    public ReportController(AuditService auditService, ReportService reportService) {
         this.auditService = auditService;
+        this.reportService = reportService;
 
     }
 
-    public void getVarianceReport() {
 
+    @GetMapping("/{date}")
+    public String getVarianceReport(@PathVariable @DateTimeFormat(pattern = "yyyyMMdd") LocalDate date) {
+        return reportService.generateVarianceReport(date);
     }
 
-    public void getRecorder() {
+    public void getReorder() {
 
     }
 
