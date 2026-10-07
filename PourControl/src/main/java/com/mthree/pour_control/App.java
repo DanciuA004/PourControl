@@ -3,6 +3,9 @@ package com.mthree.pour_control;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 
+/**
+ * Main class that kicks off the application
+ */
 @SpringBootApplication
 public class App {
     public static void main(String[] args) {

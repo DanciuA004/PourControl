@@ -5,7 +5,7 @@ import jakarta.persistence.*;
 import java.math.BigDecimal;
 
 @Entity
-@Table(name = "ingredientInCocktail")
+@Table(name = "ingredient_in_cocktail")
 public class RecipeIngredient {
 
     @Id
@@ -13,12 +13,12 @@ public class RecipeIngredient {
     private Integer id;
 
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "cocktail_id")
+    @JoinColumn(name = "cocktail_id", nullable = false)
     @JsonIgnore
     private Cocktail cocktail;
 
     @ManyToOne(fetch = FetchType.EAGER)
-    @JoinColumn(name = "ingredient_id")
+    @JoinColumn(name = "ingredient_id", nullable = false)
     private StockIngredient stockIngredient;
 
     @Column(name = "ml_required", precision = 10, scale = 2, nullable = false)

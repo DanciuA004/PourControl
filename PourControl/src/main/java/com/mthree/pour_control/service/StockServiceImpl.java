@@ -5,6 +5,7 @@ import com.mthree.pour_control.model.IngredientRepository;
 import org.springframework.stereotype.Service;
 
 import java.math.BigDecimal;
+import java.util.List;
 import java.util.Map;
 
 @Service
@@ -13,6 +14,12 @@ public class StockServiceImpl implements StockService {
 
     public StockServiceImpl(IngredientRepository ingredient) {
         this.ingredient = ingredient;
+    }
+
+    @Override
+    public List<StockIngredient> getAllIngredients() {
+        return ingredient.findAll();
+
     }
 
     @Override
@@ -25,9 +32,12 @@ public class StockServiceImpl implements StockService {
     }
 
     @Override
-    public void UpdateStockTargetValue(StockIngredient ingredient, String quantity) {
-        ingredient.setMlTarget(new BigDecimal(quantity));
-        this.ingredient.save(ingredient);
+    public void UpdateStockTargetValue(int id, String quantity) {
+        StockIngredient stockIngredient = ingredient.findById(id)
+                .orElseThrow(() -> new IllegalArgumentException("Ingredient not found: " + id));
+
+        stockIngredient.setMlTarget(new BigDecimal(quantity));
+        ingredient.save(stockIngredient);
     }
 
     @Override

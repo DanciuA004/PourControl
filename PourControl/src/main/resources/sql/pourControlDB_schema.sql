@@ -7,7 +7,6 @@ DROP TABLE IF EXISTS cocktail;
 CREATE TABLE cocktail (
     cid INT,
     cocktail_name VARCHAR(30) NOT NULL,
-    on_menu TINYINT NOT NULL,
     instructions MEDIUMTEXT,
     CONSTRAINT PK_cocktail PRIMARY KEY (cid)
 );
@@ -57,9 +56,6 @@ CREATE TABLE dailyAudit (
     CONSTRAINT FOREIGN KEY FK_ingredient_audit (ingredient_id)
         REFERENCES ingredient (iid)
 );
-
-
-
 
 DROP TABLE IF EXISTS user;
 CREATE TABLE user (

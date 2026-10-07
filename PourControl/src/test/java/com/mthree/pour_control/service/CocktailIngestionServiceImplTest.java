@@ -5,7 +5,6 @@ import com.mthree.pour_control.dto.Cocktail;
 import com.mthree.pour_control.dto.RecipeIngredient;
 import com.mthree.pour_control.dto.StockIngredient;
 import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.boot.web.client.RestTemplateBuilder;
@@ -24,13 +23,13 @@ import static org.assertj.core.api.Assertions.within;
  */
 class CocktailIngestionLogicTest {
 
-    private CocktailIngestionServiceImpl service;
+    private CocktailServiceImpl service;
 
     @BeforeEach
     void setUp() {
         // The repositories are not used by convertToMl, so null is fine here.
         // If you add RecipeIngredientRepository to the constructor, add another null.
-        service = new CocktailIngestionServiceImpl(
+        service = new CocktailServiceImpl(
                 null,
                 null,
                 new RestTemplateBuilder(),
@@ -122,7 +121,6 @@ class CocktailIngestionLogicTest {
         Cocktail cocktail = new Cocktail();
         cocktail.setId(12345);
         cocktail.setName("Margarita");
-        cocktail.setOnMenu(true);
 
         StockIngredient tequila = new StockIngredient(101, "Tequila", BigDecimal.ZERO, BigDecimal.ZERO);
         List<RecipeIngredient> recipe = new ArrayList<>();

@@ -1,23 +1,23 @@
 package com.mthree.pour_control.dto;
 
-import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
 
 import java.time.LocalDate;
 
 @Entity
-@Table(name = "dailySale")
+@Table(name = "daily_sale")
 public class DailySale {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Integer id;
+    @Column(name = "sid")
+    private Integer sid;
 
     @ManyToOne
     @JoinColumn(name = "cocktail_id", nullable = false)
     private Cocktail cocktailId;
 
-    @Column(nullable = false)
+    @Column(name = "date", nullable = false)
     private LocalDate date;
 
     @Column(name = "qty_sold", nullable = false)
@@ -32,12 +32,12 @@ public class DailySale {
         this.quantitySold = quantitySold;
     }
 
-    public Integer getId() {
-        return id;
+    public Integer getSid() {
+        return sid;
     }
 
-    public void setId(Integer id) {
-        this.id = id;
+    public void setSid(Integer sid) {
+        this.sid = sid;
     }
 
     public Cocktail getCocktailId() {

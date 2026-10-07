@@ -18,7 +18,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 @Service
-public class CocktailIngestionServiceImpl implements CocktailIngestionService {
+public class CocktailServiceImpl implements CocktailService {
 
     @Value("${spoonacular.api.key}")
     private String apiKey;
@@ -31,10 +31,10 @@ public class CocktailIngestionServiceImpl implements CocktailIngestionService {
     private final RestTemplate restTemplate;
     private final ObjectMapper objectMapper;
 
-    public CocktailIngestionServiceImpl(IngredientRepository ingredientRepository,
-                                        CocktailRepository cocktailRepository,
-                                        RestTemplateBuilder restTemplateBuilder,
-                                        ObjectMapper objectMapper) {
+    public CocktailServiceImpl(IngredientRepository ingredientRepository,
+                               CocktailRepository cocktailRepository,
+                               RestTemplateBuilder restTemplateBuilder,
+                               ObjectMapper objectMapper) {
         this.ingredientRepository = ingredientRepository;
         this.cocktailRepository = cocktailRepository;
         this.restTemplate = restTemplateBuilder.build();
@@ -53,7 +53,6 @@ public class CocktailIngestionServiceImpl implements CocktailIngestionService {
         Cocktail currentCocktail = new Cocktail();
         currentCocktail.setId(cocktailId);
         currentCocktail.setName(cocktail);
-        currentCocktail.setOnMenu(true);
 
         String recipeUrl = String.format("%s/%d/information?apiKey=%s", baseUrl, cocktailId, apiKey);
         List<RecipeIngredient> recipeIngredients = new ArrayList<>();

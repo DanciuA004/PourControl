@@ -4,10 +4,14 @@ import com.mthree.pour_control.dto.StockIngredient;
 import com.mthree.pour_control.service.StockService;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.List;
 import java.util.Map;
 
+/**
+ * This class is used for managing stock and report data
+ */
 @RestController
-@RequestMapping("/api")
+@RequestMapping("/api/stock")
 public class StockController {
     private StockService stockService;
 
@@ -16,15 +20,33 @@ public class StockController {
 
     }
 
+    @GetMapping
+    public List<StockIngredient> getAllIngredients() {
+        return stockService.getAllIngredients();
+    }
+
+    /**
+     * Update the quantity for a listed ingredient in stock.
+     *
+     * @param id the id of the ingredient
+     * @param quantity the new quantity to set
+     */
     @PutMapping("/updateQuantity/{id}")
     public void UpdateStockQuantity(@PathVariable Integer id, @RequestBody String quantity) {
         stockService.UpdateStockQuantity(id, quantity);
 
     }
 
+    /**
+     * Update the target quantity for a listed ingredient in stock.
+     * Target quantity is amount needed for one week of use.
+     *
+     * @param id the id the ingredient
+     * @param quantity the new target quantity to set
+     */
     @PostMapping("/updateTargetQuantity/{id}")
-    public void UpdateStockTargetValue(StockIngredient ingredient, String quantity) {
-        stockService.UpdateStockTargetValue(ingredient, quantity);
+    public void UpdateStockTargetValue(@PathVariable Integer id, @RequestBody String quantity) {
+        stockService.UpdateStockTargetValue(id, quantity);
 
     }
 

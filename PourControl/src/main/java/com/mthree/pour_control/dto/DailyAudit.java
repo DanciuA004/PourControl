@@ -6,18 +6,19 @@ import java.math.BigDecimal;
 import java.time.LocalDate;
 
 @Entity
-@Table(name = "dailyAudit")
+@Table(name = "daily_audit")
 public class DailyAudit {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @Column(name = "aid")
     private Integer id;
 
     @ManyToOne
     @JoinColumn(name = "ingredient_id", nullable = false)
     private StockIngredient ingredient;
 
-    @Column(nullable = false)
+    @Column(name = "date", nullable = false)
     private LocalDate date;
 
     @Column(name = "start_ml", nullable = false)

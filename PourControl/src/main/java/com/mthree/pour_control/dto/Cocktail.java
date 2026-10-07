@@ -15,10 +15,7 @@ public class Cocktail {
     @Column(name = "cocktail_name", nullable = false, length = 30)
     private String name;
 
-    @Column(name = "on_menu", nullable = false)
-    private boolean onMenu;
-
-    @Column
+    @Column(columnDefinition = "MEDIUMTEXT")
     private String instructions;
 
     @OneToMany(mappedBy = "cocktail", cascade = CascadeType.ALL, orphanRemoval = true)
@@ -31,9 +28,6 @@ public class Cocktail {
 
     public String getName() { return name; }
     public void setName(String name) { this.name = name; }
-
-    public boolean isOnMenu() { return onMenu; }
-    public void setOnMenu(boolean onMenu) { this.onMenu = onMenu; }
 
     public String getInstructions() { return instructions; }
     public void setInstructions(String instructions) { this.instructions = instructions; }

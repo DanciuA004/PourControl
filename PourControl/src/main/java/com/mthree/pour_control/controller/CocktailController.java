@@ -1,6 +1,6 @@
 package com.mthree.pour_control.controller;
 
-import com.mthree.pour_control.service.CocktailIngestionService;
+import com.mthree.pour_control.service.CocktailService;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.Map;
@@ -8,9 +8,9 @@ import java.util.Map;
 @RestController
 @RequestMapping("/api/cocktails")
 public class CocktailController {
-    private final CocktailIngestionService cocktailService;
+    private final CocktailService cocktailService;
 
-    public CocktailController(CocktailIngestionService cocktailService) {
+    public CocktailController(CocktailService cocktailService) {
         this.cocktailService = cocktailService;
     }
 
