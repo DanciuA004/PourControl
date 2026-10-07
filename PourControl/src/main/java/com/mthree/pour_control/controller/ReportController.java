@@ -25,7 +25,7 @@ public class ReportController {
     }
 
 
-    @GetMapping("/{date}")
+    @GetMapping("/report/{date}")
     public String getVarianceReport(@PathVariable @DateTimeFormat(pattern = "yyyyMMdd") LocalDate date) {
         return reportService.generateVarianceReport(date);
     }
