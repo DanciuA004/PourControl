@@ -43,7 +43,7 @@ public class ReportServiceImpl implements ReportService {
             throw new IllegalStateException("No sales data recorded for " + date + ".");
         }
 
-        // Maps ingredient id to its expected use
+        // Maps ingredient id to its expected use (stock ingredients)
         Map<Integer, BigDecimal> expectedIngredientUse = new HashMap<>();
         for (DailySale sale : salesForDate) {
             Cocktail cocktail = sale.getCocktailId();
@@ -60,7 +60,7 @@ public class ReportServiceImpl implements ReportService {
                                                 .add(totalMl));
                 }
                 // Adds new entry
-                expectedIngredientUse.put(i.getId(), totalMl);
+                expectedIngredientUse.put(i.getStockIngredient().getId(), totalMl); //corrected to used stock ingredient id as audits are linked to stock ingredients, not recipe ingredients
             }
         }
         // for the daily sales, calculate how much of each ingredient should have been used
@@ -97,8 +97,8 @@ public class ReportServiceImpl implements ReportService {
             BigDecimal diff = actual.subtract(expected);
             BigDecimal percentDiff;
 
-            if (expected.equals(new BigDecimal(0))) {
-                percentDiff = new BigDecimal(0);
+            if (expected.compareTo(BigDecimal.ZERO) == 0) {
+                percentDiff = BigDecimal.ZERO;
             } else {
                 percentDiff = diff.divide(expected, 2, RoundingMode.FLOOR);
             }
