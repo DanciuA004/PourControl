@@ -95,12 +95,12 @@ public class ReportServiceImpl implements ReportService {
 
             // Calculate difference and percentage difference
             BigDecimal diff = actual.subtract(expected);
-            BigDecimal percentDiff;
+            BigDecimal percentDiff = new BigDecimal(100);
 
             if (expected.compareTo(BigDecimal.ZERO) == 0) {
                 percentDiff = BigDecimal.ZERO;
             } else {
-                percentDiff = diff.divide(expected, 2, RoundingMode.FLOOR);
+                percentDiff = percentDiff.multiply(diff.divide(expected, 2, RoundingMode.FLOOR));
             }
 
             // Define report line based on whether ingredients were over- or underused
@@ -113,7 +113,7 @@ public class ReportServiceImpl implements ReportService {
                     diffLine = "Used exactly as much as expected";
                     break;
                 case -1:
-                    diffLine = "Used " + diff.abs() + "ml (" + percentDiff + "%) less than expected";
+                    diffLine = "Used " + diff.abs() + "ml (" + percentDiff.abs() + "%) less than expected";
             }
             ingredientReport += diffLine + "\n";
 
