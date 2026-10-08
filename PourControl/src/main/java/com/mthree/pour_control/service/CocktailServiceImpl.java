@@ -9,13 +9,13 @@ import com.mthree.pour_control.model.CocktailRepository;
 import com.mthree.pour_control.model.DailySaleRepository;
 import com.mthree.pour_control.model.IngredientRepository;
 import jakarta.transaction.Transactional;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.web.client.RestTemplateBuilder;
 import org.springframework.stereotype.Service;
 import org.springframework.web.client.RestTemplate;
 
 import java.math.BigDecimal;
+import java.math.RoundingMode;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
@@ -28,9 +28,8 @@ public class CocktailServiceImpl implements CocktailService {
 
     @Value("${spoonacular.api.url}")
     private String baseUrl;
-    @Autowired
-    private DailySaleRepository dailySaleRepository;
 
+    private final DailySaleRepository dailySaleRepository;
     private final IngredientRepository ingredientRepository;
     private final CocktailRepository cocktailRepository;
     private final RestTemplate restTemplate;
@@ -51,13 +50,23 @@ public class CocktailServiceImpl implements CocktailService {
     @Override
     @Transactional
     public Cocktail addCocktail(String cocktail) {
-        int cocktailId = getCocktailRecipeFromApi(cocktail);
-        if (cocktailId == 0) {
-            return null;
+        if (cocktail == null || cocktail.trim().isEmpty()) {
+            throw new IllegalArgumentException("Please provide a cocktail name.");
         }
 
-        Cocktail currentCocktail = new Cocktail();
-        currentCocktail.setId(cocktailId);
+        int cocktailId = getCocktailRecipeFromApi(cocktail.trim());
+        if (cocktailId == 0) {
+            throw new IllegalArgumentException("Could not find any drink matching '" + cocktail + "'. Please check the spelling.");
+        }
+
+        // Fetch managed entity or instantiate new one
+        Cocktail currentCocktail = cocktailRepository.findById(cocktailId)
+                .orElseGet(() -> {
+                    Cocktail c = new Cocktail();
+                    c.setId(cocktailId);
+                    return c;
+                });
+
         currentCocktail.setName(cocktail);
 
         String recipeUrl = String.format("%s/%d/information?apiKey=%s", baseUrl, cocktailId, apiKey);
@@ -78,31 +87,42 @@ public class CocktailServiceImpl implements CocktailService {
                     String unit = node.path("unit").asText("");
                     double amount = node.path("amount").asDouble(0.0);
 
-                    // Ensure Stock Ingredient exists in DB
+                    // Fetch or persist stock ingredient
                     StockIngredient stockIngredient = getOrCreateIngredient(id, name);
 
-                    // Unit conversion
                     double mlRequired = convertToMl(unit) * amount;
+                    BigDecimal mlBigDecimal = BigDecimal.valueOf(mlRequired)
+                            .setScale(2, RoundingMode.HALF_UP);
 
-                    // Build join entity retaining mlRequired
-                    RecipeIngredient ri = new RecipeIngredient(
-                            currentCocktail,
-                            stockIngredient,
-                            BigDecimal.valueOf(mlRequired)
-                    );
+                    // Combine amounts if duplicate ingredient nodes exist
+                    RecipeIngredient existing = recipeIngredients.stream()
+                            .filter(ri -> ri.getStockIngredient().getId() == stockIngredient.getId())
+                            .findFirst()
+                            .orElse(null);
 
-                    recipeIngredients.add(ri);
+                    if (existing != null) {
+                        existing.setMlRequired(existing.getMlRequired().add(mlBigDecimal));
+                    } else {
+                        RecipeIngredient ri = new RecipeIngredient(
+                                currentCocktail,
+                                stockIngredient,
+                                mlBigDecimal
+                        );
+                        recipeIngredients.add(ri);
+                    }
                 }
             }
         } catch (Exception e) {
-            throw new RuntimeException("Error fetching cocktail recipe details from API", e);
+            // Throw user-friendly message caught by GlobalExceptionHandler
+            throw new IllegalArgumentException("Failed to retrieve recipe details for '" + cocktail + "'. " + e.getMessage());
         }
 
-        // Link recipe ingredients to cocktail
-        currentCocktail.setRecipeIngredients(recipeIngredients);
-        saveRecipeInstructions(currentCocktail, instructions);
+        currentCocktail.setInstructions(instructions);
 
-        return currentCocktail;
+        currentCocktail.getRecipeIngredients().clear();
+        currentCocktail.getRecipeIngredients().addAll(recipeIngredients);
+
+        return cocktailRepository.save(currentCocktail);
     }
 
     @Override
@@ -116,7 +136,6 @@ public class CocktailServiceImpl implements CocktailService {
                 // Delete foreign key dependents first
                 dailySaleRepository.deleteByCocktailId(cocktail);
 
-                // Safe to delete parent cocktail record now
                 cocktailRepository.delete(cocktail);
                 return true;
             }
@@ -127,7 +146,6 @@ public class CocktailServiceImpl implements CocktailService {
     @Override
     public List<Cocktail> getAllCocktails() {
         return cocktailRepository.findAll();
-
     }
 
     private int getCocktailRecipeFromApi(String cocktailName) {
@@ -174,11 +192,5 @@ public class CocktailServiceImpl implements CocktailService {
             return 4.92892;
         }
         return 1.0;
-    }
-
-    private String saveRecipeInstructions(Cocktail cocktail, String instructions) {
-        cocktail.setInstructions(instructions);
-        Cocktail saved = cocktailRepository.save(cocktail);
-        return saved.getInstructions();
     }
 }
