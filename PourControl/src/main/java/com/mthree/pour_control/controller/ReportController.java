@@ -30,22 +30,16 @@ public class ReportController {
     @GetMapping("/report/{date}")
     public ResponseEntity<Map<String, String>> getVarianceReport(
             @PathVariable @DateTimeFormat(pattern = "yyyyMMdd") LocalDate date) {
-        try {
-            String report = reportService.generateVarianceReport(date);
-            return ResponseEntity.ok(Map.of("report", report));
-        } catch (IllegalStateException e) {
-            return ResponseEntity.status(HttpStatus.NOT_FOUND)
-                    .body(Map.of("message", e.getMessage()));
-        } catch (IllegalArgumentException e) {
-            return ResponseEntity.status(HttpStatus.BAD_REQUEST)
-                    .body(Map.of("message", e.getMessage()));
-        }
+        String report = reportService.generateVarianceReport(date);
+        return ResponseEntity.ok(Map.of("report", report));
+
     }
 
     @GetMapping("/reorder/{date}")
     @ResponseStatus(HttpStatus.OK)
-    public String getReorder(@PathVariable @DateTimeFormat(pattern = "yyyyMMdd") LocalDate date) {
-        return reportService.calculateReorder(date);
+    public ResponseEntity<Map<String, String>> getReorder(@PathVariable @DateTimeFormat(pattern = "yyyyMMdd") LocalDate date) {
+        String reorder = reportService.calculateReorder(date);
+        return ResponseEntity.ok(Map.of("reorder", reorder));
     }
 
 
