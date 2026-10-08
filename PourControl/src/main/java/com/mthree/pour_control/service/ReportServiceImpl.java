@@ -4,7 +4,9 @@ import com.mthree.pour_control.dto.*;
 import com.mthree.pour_control.model.DailyAuditRepository;
 import com.mthree.pour_control.model.DailySaleRepository;
 import com.mthree.pour_control.model.IngredientRepository;
+import jakarta.transaction.Transactional;
 import org.springframework.stereotype.*;
+import org.springframework.web.server.ResponseStatusException;
 
 import java.math.BigDecimal;
 import java.math.RoundingMode;
@@ -28,9 +30,18 @@ public class ReportServiceImpl implements ReportService {
 
 
     @Override
+    @Transactional
     public String generateVarianceReport(LocalDate date) {
         List<DailyAudit> auditsForDate = dailyAuditRepository.findByDate(date);
         List<DailySale> salesForDate = dailySaleRepository.findByDate(date);
+
+        if (auditsForDate.isEmpty()) {
+            throw new IllegalStateException("No stock audit found for " + date + ". Please complete the daily audit first.");
+        }
+
+        if (salesForDate.isEmpty()) {
+            throw new IllegalStateException("No sales data recorded for " + date + ".");
+        }
 
         // Maps ingredient id to its expected use
         Map<Integer, BigDecimal> expectedIngredientUse = new HashMap<>();
@@ -60,7 +71,9 @@ public class ReportServiceImpl implements ReportService {
             DailyAudit ingredientAudit = auditsForDate.stream()
                     .filter(a -> a.getIngredient().getId().equals(iid))
                     .findFirst()
-                    .orElse(null); // TODO: throw custom error or something?
+                    .orElseThrow(() -> new IllegalStateException(
+                            "Missing daily audit record for ingredient ID: " + iid + " on date: " + date
+                    ));
             BigDecimal actualUsed = ingredientAudit.getStartMl().subtract(ingredientAudit.getEndMl());
             actualUsage.put(iid, actualUsed);
         }
@@ -112,8 +125,42 @@ public class ReportServiceImpl implements ReportService {
     }
 
     @Override
-    public Map<StockIngredient, BigDecimal> calculateReorder() {
-        return Map.of();
+    @Transactional
+    public String calculateReorder(LocalDate today) {
+        List<AuditReorderDto> reorders = dailyAuditRepository.findAuditWithTargetStockByDate(today);
+
+        if (reorders.isEmpty()) {
+            return "No audit records found for: " + today;
+        }
+
+        StringBuilder summary = new StringBuilder();
+        summary.append("Reorder summary for: ").append(today);
+
+        for (AuditReorderDto reorder : reorders) {
+            BigDecimal reorderAmount = calculateReorder(reorder);
+
+            // only list items that actually need reordering
+            if (reorderAmount.compareTo(BigDecimal.ZERO) > 0) {
+                summary.append("\n- ")
+                        .append(reorder.getIngredientName())
+                        .append(": ")
+                        .append(reorderAmount)
+                        .append(" ml");
+            }
+        }
+
+        return summary.toString();
+    }
+
+    private BigDecimal calculateReorder(AuditReorderDto reorder) {
+        if (reorder.getTargetMl() == null || reorder.getEndMl() == null) {
+            return BigDecimal.ZERO;
+        }
+
+        BigDecimal required = reorder.getTargetMl().subtract(reorder.getEndMl());
+
+        // if required <= 0, return 0 (no reorder needed)
+        return required.compareTo(BigDecimal.ZERO) > 0 ? required : BigDecimal.ZERO;
     }
 
 }

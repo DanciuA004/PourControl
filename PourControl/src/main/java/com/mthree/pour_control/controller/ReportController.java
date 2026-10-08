@@ -6,9 +6,11 @@ import com.mthree.pour_control.service.ReportService;
 import com.mthree.pour_control.service.StockService;
 import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.time.LocalDate;
+import java.util.Map;
 
 @RestController
 @CrossOrigin(origins = "*")
@@ -26,12 +28,24 @@ public class ReportController {
 
 
     @GetMapping("/report/{date}")
-    public String getVarianceReport(@PathVariable @DateTimeFormat(pattern = "yyyyMMdd") LocalDate date) {
-        return reportService.generateVarianceReport(date);
+    public ResponseEntity<Map<String, String>> getVarianceReport(
+            @PathVariable @DateTimeFormat(pattern = "yyyyMMdd") LocalDate date) {
+        try {
+            String report = reportService.generateVarianceReport(date);
+            return ResponseEntity.ok(Map.of("report", report));
+        } catch (IllegalStateException e) {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND)
+                    .body(Map.of("message", e.getMessage()));
+        } catch (IllegalArgumentException e) {
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST)
+                    .body(Map.of("message", e.getMessage()));
+        }
     }
 
-    public void getReorder() {
-
+    @GetMapping("/reorder/{date}")
+    @ResponseStatus(HttpStatus.OK)
+    public String getReorder(@PathVariable @DateTimeFormat(pattern = "yyyyMMdd") LocalDate date) {
+        return reportService.calculateReorder(date);
     }
 
 

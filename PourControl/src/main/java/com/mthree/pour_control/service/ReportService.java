@@ -10,5 +10,5 @@ public interface ReportService {
 
     public String generateVarianceReport(LocalDate date);
 
-    public Map<StockIngredient, BigDecimal> calculateReorder();
+    public String calculateReorder(LocalDate date);
 }
