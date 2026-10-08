@@ -15,4 +15,6 @@ public interface DailySaleRepository extends JpaRepository<DailySale, Integer> {
     List<DailySale> findByDate(LocalDate date);
 
     Optional<DailySale> findByCocktailIdAndDate(Cocktail cocktail, LocalDate date);
+
+    void deleteByCocktailId(Cocktail cocktail);
 }

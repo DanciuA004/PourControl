@@ -6,8 +6,10 @@ import com.mthree.pour_control.dto.Cocktail;
 import com.mthree.pour_control.dto.RecipeIngredient;
 import com.mthree.pour_control.dto.StockIngredient;
 import com.mthree.pour_control.model.CocktailRepository;
+import com.mthree.pour_control.model.DailySaleRepository;
 import com.mthree.pour_control.model.IngredientRepository;
 import jakarta.transaction.Transactional;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.web.client.RestTemplateBuilder;
 import org.springframework.stereotype.Service;
@@ -16,6 +18,7 @@ import org.springframework.web.client.RestTemplate;
 import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
 
 @Service
 public class CocktailServiceImpl implements CocktailService {
@@ -25,6 +28,8 @@ public class CocktailServiceImpl implements CocktailService {
 
     @Value("${spoonacular.api.url}")
     private String baseUrl;
+    @Autowired
+    private DailySaleRepository dailySaleRepository;
 
     private final IngredientRepository ingredientRepository;
     private final CocktailRepository cocktailRepository;
@@ -33,10 +38,12 @@ public class CocktailServiceImpl implements CocktailService {
 
     public CocktailServiceImpl(IngredientRepository ingredientRepository,
                                CocktailRepository cocktailRepository,
+                               DailySaleRepository dailySaleRepository,
                                RestTemplateBuilder restTemplateBuilder,
                                ObjectMapper objectMapper) {
         this.ingredientRepository = ingredientRepository;
         this.cocktailRepository = cocktailRepository;
+        this.dailySaleRepository = dailySaleRepository;
         this.restTemplate = restTemplateBuilder.build();
         this.objectMapper = objectMapper;
     }
@@ -99,10 +106,20 @@ public class CocktailServiceImpl implements CocktailService {
     }
 
     @Override
+    @Transactional
     public boolean removeCocktail(Integer id) {
-        if (id != null && cocktailRepository.existsById(id)) {
-            cocktailRepository.deleteById(id);
-            return true;
+        if (id != null) {
+            Optional<Cocktail> cocktailOptional = cocktailRepository.findById(id);
+            if (cocktailOptional.isPresent()) {
+                Cocktail cocktail = cocktailOptional.get();
+
+                // Delete foreign key dependents first
+                dailySaleRepository.deleteByCocktailId(cocktail);
+
+                // Safe to delete parent cocktail record now
+                cocktailRepository.delete(cocktail);
+                return true;
+            }
         }
         return false;
     }
