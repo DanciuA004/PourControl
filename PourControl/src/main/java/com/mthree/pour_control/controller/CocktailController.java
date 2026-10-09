@@ -27,6 +27,7 @@ public class CocktailController {
     @DeleteMapping("/{id}")
     public boolean removeCocktail(@PathVariable Integer id) {
         return cocktailService.removeCocktail(id);
+
     }
 
     @GetMapping
